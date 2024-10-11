@@ -1,24 +1,24 @@
 # This workflow will build and push a Docker container to an Azure Web App when a commit is pushed to your default branch.
 #
 # This workflow assumes you have already created the target Azure App Service web app.
-# For instructions see https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=dotnet&pivots=container-linux
+# For instructions, see: https://docs.microsoft.com/en-us/azure/app-service/quickstart-custom-container?tabs=dotnet&pivots=container-linux
 #
 # To configure this workflow:
 #
-# 1. Download the Publish Profile for your Azure Web App. You can download this file from the Overview page of your Web App in the Azure Portal.
+# 1. Download the Publish Profile for your Azure Web App from the Overview page of your Web App in the Azure Portal.
 #    For more information: https://docs.microsoft.com/en-us/azure/app-service/deploy-github-actions?tabs=applevel#generate-deployment-credentials
 #
-# 2. Create a secret in your repository named AZURE_WEBAPP_PUBLISH_PROFILE, paste the publish profile contents as the value of the secret.
-#    For instructions on obtaining the publish profile see: https://docs.microsoft.com/azure/app-service/deploy-github-actions#configure-the-github-secret
+# 2. Create a secret in your repository named AZURE_WEBAPP_PUBLISH_PROFILE and paste the publish profile contents as the value.
+#    For instructions on obtaining the publish profile, see: https://docs.microsoft.com/azure/app-service/deploy-github-actions#configure-the-github-secret
 #
-# 3. Create a GitHub Personal access token with "repo" and "read:packages" permissions.
+# 3. Create a GitHub Personal Access Token (PAT) with "repo" and "read:packages" permissions.
 #
-# 4. Create three app settings on your Azure Web app:
-#       DOCKER_REGISTRY_SERVER_URL: Set this to "https://ghcr.io"
-#       DOCKER_REGISTRY_SERVER_USERNAME: Set this to the GitHub username or organization that owns the repository
-#       DOCKER_REGISTRY_SERVER_PASSWORD: Set this to the value of your PAT token from the previous step
+# 4. Create three app settings on your Azure Web App:
+#    - DOCKER_REGISTRY_SERVER_URL: Set this to "https://ghcr.io"
+#    - DOCKER_REGISTRY_SERVER_USERNAME: Set this to your GitHub username or organization that owns the repository
+#    - DOCKER_REGISTRY_SERVER_PASSWORD: Set this to the value of your PAT from the previous step
 #
-# 5. Change the value for the AZURE_WEBAPP_NAME.
+# 5. Change the value for the AZURE_WEBAPP_NAME to match your Azure Web App's name.
 #
 # For more information on GitHub Actions for Azure: https://github.com/Azure/Actions
 # For more information on the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
@@ -27,7 +27,10 @@
 name: Build and deploy a container to an Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: testcgg  # set this to the name of your Azure Web App
+  AZURE_WEBAPP_NAME: testcgg  # Set this to the name of your Azure Web App
+  AZURE_TENANT_ID: 0f58c4d1-fbb2-45b8-a0a2-63f1dccdceea  # Azure Tenant ID
+  AZURE_APP_ID: 74a1231a-731a-4b0c-a154-4cd5b6b76e37  # Application (Client) ID
+  AZURE_SUBSCRIPTION_ID: 5a867e72-92e0-4b09-8f61-0c7f00af0f6d  # Azure Subscription ID
 
 on:
   push:
@@ -74,6 +77,13 @@ jobs:
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_APP_ID }}  # Set this to your Azure App ID
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Set this to your Azure Client Secret
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}  # Set this to your Azure Tenant ID
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
